@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
-
+    const [addedToCart, setAddedToCart] = useState({});
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -238,6 +239,15 @@ function ProductList({ onHomeClick }) {
         onHomeClick();
     };
 
+    const handleAddToCart = (product) => {
+        dispatch(addItem(product)); // Dispatch the action to add the product to the cart (Redux action)
+      
+        setAddedToCart((prevState) => ({ // Update the local state to reflect that the product has been added
+          ...prevState, // Spread the previous state to retain existing entries
+          [product.name]: true, // Set the current product's name as a key with value 'true' to mark it as added
+        }));
+    };
+
     const handleCartClick = (e) => {
         e.preventDefault();
         setShowCart(true); // Set showCart to true when cart icon is clicked
@@ -246,6 +256,9 @@ function ProductList({ onHomeClick }) {
         e.preventDefault();
         setShowPlants(true); // Set showAboutUs to true when "About Us" link is clicked
         setShowCart(false); // Hide the cart when navigating to About Us
+    };
+    const calculateTotalQuantity = () => {
+        return CartItems ? CartItems.reduce((total, item) => total + item.quantity, 0) : 0;
     };
 
     const handleContinueShopping = (e) => {
@@ -274,14 +287,74 @@ function ProductList({ onHomeClick }) {
             </div>
             {!showCart ? (
                 <div className="product-grid">
+                    {plantsArray.map((category, index) => ( // Loop through each category in plantsArray
+                        <div key={index}> {/* Unique key for each category div */}
+                            <h1>
+                            <div>{category.category}</div> {/* Display the category name */}
+                            </h1>
+                            <div className="product-list"> {/* Container for the list of plant cards */}
+                            {category.plants.map((plant, plantIndex) => ( // Loop through each plant in the current category
+                                <div className="product-card" key={plantIndex}> {/* Unique key for each plant card */}
+                                <img 
+                                    className="product-image" 
+                                    src={plant.image} 
+                                    alt={plant.name} 
+                                />
+                                <div className="product-title">{plant.name}</div>
+                                <div className="product-description">{plant.description}</div>
+                                <div className="product-cost">${plant.cost}</div>
+                                <button 
+                                    className="product-button" 
+                                    onClick={() => handleAddToCart(plant)}
+                                >
+                                    Add to Cart
+                                </button>
+                                </div>
+                            ))}
+                            </div>
+                        </div>
+                        ))}
+        <div key={index}>
+            {/* Display the Category Name */}
+            <h1><div>{category.category}</div></h1>
+            
+            <div className="product-list">
+                {category.plants.map((plant, plantIndex) => (
+                    <div className="product-card" key={plantIndex}>
+                        {/* 1. Display Plant Image */}
+                        <img 
+                            className="product-image" 
+                            src={plant.image} 
+                            alt={plant.name} 
+                        />
+                        
+                        {/* 2. Display Plant Name */}
+                        <div className="product-title">{plant.name}</div>
+                        
+                        {/* 3. Display Plant Description */}
+                        <div className="product-description">{plant.description}</div>
+                        
+                        {/* 4. Display Plant Cost */}
+                        <div className="product-cost">{plant.cost}</div>
 
-
+                        {/* 5. Add to Cart Button */}
+                        <button 
+                            className="product-button" 
+                            onClick={() => handleAddToCart(plant)}
+                        >
+                            Add to Cart
+                        </button>
+                        </div>
+                ))}
                 </div>
-            ) : (
-                <CartItem onContinueShopping={handleContinueShopping} />
-            )}
+            </div>
+        ))}
         </div>
+    ) : (
+        <CartItem onContinueShopping={handleContinueShopping} />
+    )}
+</div>
     );
-}
+};
 
 export default ProductList;
